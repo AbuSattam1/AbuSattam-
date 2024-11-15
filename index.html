@@ -2,7 +2,8 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>أرسل رسالة صراحة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إرسال رسالة مجهولة إلى أبو سطام</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,61 +63,24 @@
             font-size: 0.9em;
             color: #888;
         }
-        .switch-container {
-            margin-top: 10px;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
+        #shareButton {
+            background-color: #008CBA;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            border: none;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 34px;
+            margin-top: 15px;
         }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #4CAF50;
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
+        #shareButton:hover {
+            background-color: #007B9E;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>أرسل رسالة صراحة إلى أبو سطام</h1>
-        <div class="switch-container">
-            الوضع الليلي
-            <label class="switch">
-                <input type="checkbox" id="darkModeToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+        <h1>إرسال رسالة مجهولة إلى أبو سطام</h1>
         <form id="messageForm">
             <input type="text" id="username" placeholder="اكتب اسمك (اختياري)" />
             <textarea id="message" rows="5" placeholder="اكتب رسالتك هنا..." required></textarea>
@@ -126,29 +90,17 @@
             <div id="loading" class="loading">جاري الإرسال...</div>
         </form>
         <p id="status"></p>
+        <button id="shareButton" onclick="shareSite()">مشاركة الموقع</button>
     </div>
 
     <script>
-        const botToken = '7587795138:AAGDl-xDBTrBBOLBAxOEL1ylP2N8yxabLFg'; // ضع توكن البوت هنا
-        const chatId = '201453'; // ضع معرف الدردشة هنا
+        const botToken = 'YOUR_BOT_TOKEN'; // ضع توكن البوت هنا
+        const chatId = 'YOUR_CHAT_ID'; // ضع معرف الدردشة هنا
 
         function getFormattedDate() {
             const now = new Date();
             return `${now.toLocaleDateString('ar-EG')} - ${now.toLocaleTimeString('ar-EG')}`;
         }
-
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        darkModeToggle.addEventListener('change', () => {
-            if (darkModeToggle.checked) {
-                body.style.backgroundColor = '#333';
-                body.style.color = '#fff';
-            } else {
-                body.style.backgroundColor = '#f0f0f0';
-                body.style.color = '#000';
-            }
-        });
 
         document.getElementById('message').addEventListener('input', function () {
             const maxLength = 250;
@@ -225,6 +177,18 @@ ${message}
                 console.error('Error:', error);
             });
         });
+
+        function shareSite() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'إرسال رسالة مجهولة إلى أبو سطام',
+                    text: 'أرسل رسالة مجهولة إلى أبو سطام عبر هذا الموقع!',
+                    url: window.location.href
+                }).catch(error => console.log('Error sharing:', error));
+            } else {
+                alert('مشاركة الموقع غير مدعومة في متصفحك');
+            }
+        }
     </script>
 
 </body>

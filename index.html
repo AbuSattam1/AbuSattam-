@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>أرسل رسالة صراحة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            animation: fadeIn 1.5s;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        textarea, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            resize: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #status {
+            margin-top: 15px;
+            color: #555;
+        }
+        .loading {
+            display: none;
+            color: blue;
+            font-weight: bold;
+        }
+        .char-counter {
+            text-align: right;
+            font-size: 0.9em;
+            color: #888;
+        }
+        .switch-container {
+            margin-top: 10px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>أرسل رسالة صراحة إلى أبو سطام</h1>
+        <div class="switch-container">
+            الوضع الليلي
+            <label class="switch">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <form id="messageForm">
+            <input type="text" id="username" placeholder="اكتب اسمك (اختياري)" />
+            <textarea id="message" rows="5" placeholder="اكتب رسالتك هنا..." required></textarea>
+            <div class="char-counter" id="charCounter">0/250</div>
+            <input type="file" id="fileInput" />
+            <button type="submit">إرسال</button>
+            <div id="loading" class="loading">جاري الإرسال...</div>
+        </form>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const botToken = '7587795138:AAGDl-xDBTrBBOLBAxOEL1ylP2N8yxabLFg'; // ضع توكن البوت هنا
+        const chatId = '201453'; // ضع معرف الدردشة هنا
+
+        function getFormattedDate() {
+            const now = new Date();
+            return `${now.toLocaleDateString('ar-EG')} - ${now.toLocaleTimeString('ar-EG')}`;
+        }
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                body.style.backgroundColor = '#333';
+                body.style.color = '#fff';
+            } else {
+                body.style.backgroundColor = '#f0f0f0';
+                body.style.color = '#000';
+            }
+        });
+
+        document.getElementById('message').addEventListener('input', function () {
+            const maxLength = 250;
+            const currentLength = this.value.length;
+            const charCounter = document.getElementById('charCounter');
+            charCounter.textContent = `${currentLength}/${maxLength}`;
+
+            if (currentLength > maxLength) {
+                this.value = this.value.substring(0, maxLength);
+            }
+        });
+
+        document.getElementById('messageForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const message = document.getElementById('message').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const status = document.getElementById('status');
+            const loading = document.getElementById('loading');
+
+            if (message === '' && fileInput.files.length === 0) {
+                status.textContent = 'يرجى كتابة رسالة أو اختيار ملف.';
+                status.style.color = 'red';
+                return;
+            }
+
+            loading.style.display = 'block';
+            const formattedDate = getFormattedDate();
+            const telegramMessage = `
+- وصلتك رسالة جديدة من ${username || 'مجهول'}
+- وقت الرسالة: ${formattedDate}
+----
+${message}
+----
+- لا يمكنك الرد عليها
+            `;
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: telegramMessage
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (fileInput.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('chat_id', chatId);
+                    formData.append('document', fileInput.files[0]);
+
+                    return fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+            })
+            .then(() => {
+                loading.style.display = 'none';
+                status.textContent = 'تم إرسال رسالتك ووسائطك بنجاح!';
+                status.style.color = 'green';
+                document.getElementById('message').value = '';
+                document.getElementById('username').value = '';
+                fileInput.value = '';
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                status.textContent = 'حدث خطأ في الاتصال.';
+                status.style.color = 'red';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+
+</body>
+</html>
